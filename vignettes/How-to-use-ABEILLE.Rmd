@@ -1,0 +1,140 @@
+---
+title: "Vignette: How to use ABEILLE"
+subtitle: "ABEILLE: a novel method for ABerrant Expression Identification empLoying machine LEarning from sequencing data"
+author: "Gwendal Le Bideau, Samira Ait-El-Mkadem - Saadi, Sylvie Bannwarth, Véronique Paquis-Flucklinger, Silvia Bottini"
+output: rmarkdown::html_document
+vignette: >
+  %\VignetteIndexEntry{Vignette: How to use ABEILLE}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+In this vignette let us show how to use ABEILLE, and show how the model can be used in a customizable way. The first thing to do is to load the package.
+```{r setup}
+library(ABEILLE)
+```
+
+In the package there is a toy dataset, it can be load with *ExampleAbeilleDataSet*.
+
+```{r}
+toy_dataset <- ExampleAbeilleDataSet
+print(paste("The dataframe contains",
+            dim(toy_dataset)[1],"transcripts and",
+            dim(toy_dataset)[2],"samples"))
+head(toy_dataset[,1:6])
+```
+As you can see, ABEILLE is build to work with dataset load as dataframe where transcripts/genes are in rows and samples in columns. The next step is to use the function *DataIntegrity* to check if there is a problem with the data (like NaN or Inf values for example).
+
+```{r}
+DataIntegrity(toy_dataset)
+```
+
+Since transcript with 0 counts on the entire row is not useful for ABEILLE you can already remove these rows. The function *RemoveZeroCounts* is here for that purpose.
+
+```{r}
+#To show the function RemoveZeroCounts let us add a row with only 0
+toy_dataset[14001,] <- 0
+print(dim(toy_dataset))
+toy_dataset <- RemoveZeroCounts(toy_dataset)
+```
+Let us make a save of this dataset for the next function
+```{r eval=FALSE}
+write.csv(toy_dataset, "toy_dataset.csv")
+#Don't add arguments
+```
+The goal is now to recreate the data without the outliers. To do so, the dataset needs pass in an autoencoder. We provided a python code containing a VAE named *abeille.py* findable in the package. It can be launched on R using the *reticulate* package or you can use it directly on python. We highly recommend to use it on a machine with GPU acceleration. Feel free to use your own neural network and try to find an advanced architecture.
+
+So let us load *reticulate*, source python and run the loaded function.
+```{r eval=FALSE}
+library(reticulate)
+#Source my own python environment
+#To find your python path you can use os.path.dirname(sys.executable) on python
+use_python("C:/ProgramData/Anaconda3")
+#If you don't have environment ready, you can load library needed in python
+py_install("numpy")
+py_install("pandas")
+py_install("tensorflow")
+#Load the VAE function
+source_python("abeille.py")
+toy_dataset_recons <- abeille_VAE("toy_dataset.csv")
+```
+Here is the list of all the arguments usable in the *abeille_VAE* function:
+
+WARNING: if you use it on R arguments using an integer needs to be set as 20L for 20 (for example)
+
+* **file** (only mandatory parameter), the path to the file to pass in the autoencoder.
+* **logarithm** (default True), boolean to log the input data.
+* **read_count** (default True), boolean to correct value bellow 0 (needed if you use read count data).
+* **batch_size** (default 30), number of training examples utilized in one iteration.
+* **epochs** (default 1500), number of time the dataset is passed forward and backward through the neural network.
+* **kernel** (default "lecun_normal"), type of initialization of the neurons.
+* **kl_loss_weight** (default 0.5), weight of the Kullback - Leibler loss.
+* **edl1** (default 2048), stand for encoder dense layer 1, number of layer in the first hidden layer.
+* **edl2** (default 1024), stand for encoder dense layer 2, number of layer in the second hidden layer.
+* **edl3** (default 512), stand for encoder dense layer 3, number of layer in the third hidden layer.
+* **edl4** (default 256), stand for encoder dense layer 4, number of layer in the fourth hidden layer.
+* **latent_size** (default 128), size of the latent space
+* **ddl1** (default 256), stand for decoder dense layer 1, number of layer in the sixth layer.
+* **ddl2** (default 512), stand for decoder dense layer 2, number of layer in the seventh layer.
+* **ddl3** (default 1024), stand for decoder dense layer 3, number of layer in the eigth layer.
+* **ddl4** (default 2048), stand for decoder dense layer 4, number of layer in the ninth layer.
+
+Since there is already a reconstruction generate by the ABEILLE VAE available in the package let us load it
+```{r}
+toy_dataset_recons <- ExampleAbeilleReconstructed
+```
+
+To judge the performance of the reconstruction use the function *StatsPred*
+```{r}
+StatsPred(toy_dataset, toy_dataset_recons)
+```
+
+Then two metric is needed for the linear regression, ABEILLE offers a function to compute the Z-score and the Log2 fold-change. As the neural network you can provide your own metric.
+```{r}
+zscore <- Zscore(toy_dataset, toy_dataset_recons)
+l2fc <- L2FC(toy_dataset, toy_dataset_recons)
+```
+
+Finally to obtain the outliers use the function *PickOutliers*
+```{r}
+outliers <- PickOutliers(zscore, l2fc, toy_dataset, toy_dataset_recons)
+print(head(outliers))
+```
+It is possible to create your own decision tree, to pick outliers. This one was build to find outliers following the OUTRIDER outliers distribution.
+```{r}
+light_tree <- function(linear_reg_data){
+  bool_vector <- ifelse(linear_reg_data["cooksD"] >= 15.0,TRUE,FALSE)
+  return(bool_vector)
+}
+outliers <- PickOutliers(zscore, l2fc, toy_dataset, toy_dataset_recons, decision_tree = light_tree)
+print(head(outliers))
+```
+It is also possible to get an approximation of the negative binomial P-value using an estimation of the gene dispersion. This will only work if you are using raw counts.
+
+```{r}
+genedisp <- GeneDisp(toy_dataset)
+outliers <- PickOutliers(zscore, l2fc, toy_dataset, toy_dataset_recons, nb_pval = genedisp)
+print(head(outliers))
+```
+In the package you can also find a function to estimate the size factor. But to use it, you need a table containing information on the samples
+```{r}
+anno_table <- data.frame(sampleID = colnames(toy_dataset), Sex = sample(c("Male", "Female"), 128, replace = TRUE), Age = sample(1:89, 128, replace = TRUE), Cohort = rep("GTEx database",128))
+sizefactor <- SizeFactors(toy_dataset, anno_table)
+print(head(sizefactor))
+```
+Finally there is two function to add outliers inside a dataset. The first on is describe in the OUTRIDER paper.
+```{r}
+outrider_outliers <- AddOutriderOutliers(toy_dataset, sizefactor, drawoption = 10^-5)
+```
+
+The second one is by adding gaussian noise to the counts
+```{r}
+gaussian_outliers <- AddGaussianOutliers(toy_dataset, drawoption = 10^-5)
+```
+
+

@@ -1,0 +1,26 @@
+Package: ABEILLE
+Type: Package
+Title: ABEILLE: a novel method for ABerrant Expression Identification empLoying machine LEarning from sequencing data
+Version: 1.0.0
+Author: Gwendal Le Bideau [aut, cre]
+Maintainer: Gwendal Le Bideau <glebideau@uca.fr>
+Description: ABEILLE is a method to find aberrant expression in sequencing data fully based on machine learning. The main core of the method is a VAE.
+Depends: R (>= 4.0.0)
+biocViews:
+License: GPL-3
+Encoding: UTF-8
+LazyData: true
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
+Imports: 
+    crayon,
+    edgeR,
+    DESeq2,
+    e1071,
+    matrixStats,
+    stats,
+    progress,
+    reticulate
+RoxygenNote: 7.1.1
