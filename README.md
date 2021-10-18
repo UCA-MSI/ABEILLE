@@ -11,7 +11,7 @@ We highly recommand to read the vignette explaining how to use every function.
 
 ### Installing
 
-Build the on the whole architecture or load the tar.gz file as a package.
+Build on the whole architecture or load the tar.gz file as a package.
 
 From Rstudio:
 
