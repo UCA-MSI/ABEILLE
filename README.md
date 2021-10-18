@@ -7,9 +7,19 @@ ABEILLE is fast and new method to identify aberrant expression in count table us
 
 ### Prerequisites
 
-We highly to read the vignette explaining how to use every function.
+We highly recommand to read the vignette explaining how to use every function.
 
 ### Installing
 
 Build the on the whole architecture or load the tar.gz file as a package.
+
+From Rstudio:
+
+```
+setwd("/my/path/to/ABEILLE")
+devtools::build()
+devtools::install()
+library(ABEILLE)
+```
+
 
