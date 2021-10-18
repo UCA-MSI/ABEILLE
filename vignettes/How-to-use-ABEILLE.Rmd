@@ -1,7 +1,7 @@
 ---
 title: "Vignette: How to use ABEILLE"
 subtitle: "ABEILLE: a novel method for ABerrant Expression Identification empLoying machine LEarning from sequencing data"
-author: "Gwendal Le Bideau, Samira Ait-El-Mkadem - Saadi, Sylvie Bannwarth, Véronique Paquis-Flucklinger, Silvia Bottini"
+author: "Gwendal Le Bideau, David Pratella, Samira Ait-El-Mkadem - Saadi, Sylvie Bannwarth, Véronique Paquis-Flucklinger, Silvia Bottini"
 output: rmarkdown::html_document
 vignette: >
   %\VignetteIndexEntry{Vignette: How to use ABEILLE}
@@ -114,13 +114,7 @@ light_tree <- function(linear_reg_data){
 outliers <- PickOutliers(zscore, l2fc, toy_dataset, toy_dataset_recons, decision_tree = light_tree)
 print(head(outliers))
 ```
-It is also possible to get an approximation of the negative binomial P-value using an estimation of the gene dispersion. This will only work if you are using raw counts.
 
-```{r}
-genedisp <- GeneDisp(toy_dataset)
-outliers <- PickOutliers(zscore, l2fc, toy_dataset, toy_dataset_recons, nb_pval = genedisp)
-print(head(outliers))
-```
 In the package you can also find a function to estimate the size factor. But to use it, you need a table containing information on the samples
 ```{r}
 anno_table <- data.frame(sampleID = colnames(toy_dataset), Sex = sample(c("Male", "Female"), 128, replace = TRUE), Age = sample(1:89, 128, replace = TRUE), Cohort = rep("GTEx database",128))

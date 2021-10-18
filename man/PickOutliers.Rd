@@ -9,8 +9,7 @@ PickOutliers(
   l2fc,
   SequencingTable,
   ReconstructedTable,
-  decision_tree = my_tree,
-  nb_pval = FALSE
+  decision_tree = my_tree
 )
 }
 \arguments{
@@ -23,8 +22,6 @@ PickOutliers(
 \item{ReconstructedTable}{the reconstructed table generate by an autoencoder.}
 
 \item{decision_tree}{function containing a custom decision tree. Check the help of the function my_tree for more information.}
-
-\item{nb_pval}{argument allowing to have an additional column in the result. The column is an estimation of the P-value using negative binomial distribution.}
 }
 \value{
 Data frame containing only rows predict as outliers.
@@ -39,6 +36,6 @@ zscore <- Zscore(SequencingTable,ReconstructedTable)
 l2fc <- L2FC(SequencingTable,ReconstructedTable)
 genedisp <- GeneDisp(SequencingTable)
 outliers <- PickOutliers(zscore,l2fc,SequencingTable, ReconstructedTable,
-decision_tree = my_tree, nb_pval=genedisp)
+decision_tree = my_tree)
 print(head(outliers))
 }
