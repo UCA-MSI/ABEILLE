@@ -254,7 +254,7 @@ toy_dataset_recons &lt;- abeille_VAE(&quot;toy_dataset.csv&quot;)</code></pre>
 <p>Then two metric is needed for the linear regression, ABEILLE offers a function to compute the Z-score and the Log2 fold-change. As the neural network you can provide your own metric.</p>
 <pre class="r"><code>zscore &lt;- Zscore(toy_dataset, toy_dataset_recons)
 l2fc &lt;- L2FC(toy_dataset, toy_dataset_recons)</code></pre>
-<p>Finally to obtain the outliers use the function <em>PickOutliers</em></p>
+<p>Finally to obtain the outliers use the function <em>PickOutliers</em> The <em>PickOutliers</em> function will also use the function <em>ComputeAberrantScore</em> that will return an Aberrant Score associated to each Outliers with a score from 1 to 4.</p>
 <pre class="r"><code>outliers &lt;- PickOutliers(zscore, l2fc, toy_dataset, toy_dataset_recons)
 print(head(outliers))
 #&gt;     Sample      Transcript value reconstruction    zscore      l2fc typeerror

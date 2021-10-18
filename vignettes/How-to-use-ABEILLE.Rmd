@@ -101,6 +101,7 @@ l2fc <- L2FC(toy_dataset, toy_dataset_recons)
 ```
 
 Finally to obtain the outliers use the function *PickOutliers*
+The *PickOutliers* function will also use the function *ComputeAberrantScore* that will return an Aberrant Score associated to each Outliers with a score from 1 to 4.
 ```{r}
 outliers <- PickOutliers(zscore, l2fc, toy_dataset, toy_dataset_recons)
 print(head(outliers))
