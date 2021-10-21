@@ -7,7 +7,7 @@
 ComputeAberrantScore(my_df)
 }
 \arguments{
-\item{zscore}{data frame of the same size as the initial dataset. The z-score can be compute with the function Zscore.}
+\item{divergence_score}{data frame of the same size as the initial dataset. The z-score can be compute with the function divergence_score.}
 }
 \value{
 Data frame with additional column containing Aberrant Score.

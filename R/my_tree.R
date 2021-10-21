@@ -4,8 +4,8 @@
 #' \itemize{
 #'  \item{"value"}{ the original value.}
 #'  \item{"reconstruction"}{ the value reconstructed.}
-#'  \item{"zscore"}{ see Zscore function.}
-#'  \item{"l2fc"}{ see L2FC function.}
+#'  \item{"divergence_score"}{ see DivergenceScore function.}
+#'  \item{"delta_count"}{ see DeltaCount function.}
 #'  \item{"typeerror"}{ standardized residual. For more check rstandard function.}
 #'  \item{"cooksD"}{ cook's distance. For more check cooks.distance function.}
 #'  \item{"hat"}{ projection matrix. For more check hatvalues function.}
@@ -21,9 +21,9 @@
 #'  bool_vector <- ifelse(linear_reg_data['dfbetas_var'] >= 1.1,
 #'  ifelse(linear_reg_data['hat'] >= 0.2, TRUE,
 #'  ifelse(linear_reg_data['typeerror'] < 2.4, TRUE,
-#'  ifelse(linear_reg_data['l2fc'] >= 2.4,
-#'  ifelse(linear_reg_data['zscore'] >= 6.6, TRUE, FALSE), FALSE))),
-#'  ifelse(linear_reg_data['zscore'] >=11, TRUE, FALSE))
+#'  ifelse(linear_reg_data['delta_count'] >= 2.4,
+#'  ifelse(linear_reg_data['divergence_score'] >= 6.6, TRUE, FALSE), FALSE))),
+#'  ifelse(linear_reg_data['divergence_score'] >=11, TRUE, FALSE))
 #'
 #'  #A simple tree possible:
 #'  bool_vector <- ifelse(linear_reg_data['cooksD'] >= 5, TRUE, FALSE)
@@ -32,7 +32,7 @@
 
 my_tree <- function(linear_reg_data){
   bool_vector <- ifelse(linear_reg_data['dfbetas_var'] >= 1.1,
-                        ifelse(linear_reg_data['hat'] >= 0.2, TRUE, ifelse(linear_reg_data['typeerror'] < 2.4, TRUE, ifelse(linear_reg_data['l2fc'] >= 2.4, ifelse(linear_reg_data['zscore'] >= 6.6, TRUE, FALSE), FALSE))),
-                        ifelse(linear_reg_data['zscore'] >=11,TRUE,FALSE))
+                        ifelse(linear_reg_data['hat'] >= 0.2, TRUE, ifelse(linear_reg_data['typeerror'] < 2.4, TRUE, ifelse(linear_reg_data['delta_count'] >= 2.4, ifelse(linear_reg_data['divergence_score'] >= 6.6, TRUE, FALSE), FALSE))),
+                        ifelse(linear_reg_data['divergence_score'] >=11,TRUE,FALSE))
   return(bool_vector)
 }

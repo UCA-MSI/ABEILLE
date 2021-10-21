@@ -251,47 +251,61 @@ toy_dataset_recons &lt;- abeille_VAE(&quot;toy_dataset.csv&quot;)</code></pre>
 #&gt; Empty samples: 0 on 128 
 #&gt; Empty transcripts: 5419 on 14000 
 #&gt; Number of zeros: 888391 on 799381</code></pre>
-<p>Then two metric is needed for the linear regression, ABEILLE offers a function to compute the Z-score and the Log2 fold-change. As the neural network you can provide your own metric.</p>
-<pre class="r"><code>zscore &lt;- Zscore(toy_dataset, toy_dataset_recons)
-l2fc &lt;- L2FC(toy_dataset, toy_dataset_recons)</code></pre>
+<p>Then two metric is needed for the linear regression, ABEILLE offers a function to compute the Divergence score and the Delta count. As the neural network you can provide your own metric.</p>
+<pre class="r"><code>divergence_score &lt;- DivergenceScore(toy_dataset, toy_dataset_recons)
+delta_count &lt;- DeltaCount(toy_dataset, toy_dataset_recons)</code></pre>
 <p>Finally to obtain the outliers use the function <em>PickOutliers</em> The <em>PickOutliers</em> function will also use the function <em>ComputeAberrantScore</em> that will return an Aberrant Score associated to each Outliers with a score from 1 to 4.</p>
-<pre class="r"><code>outliers &lt;- PickOutliers(zscore, l2fc, toy_dataset, toy_dataset_recons)
+<pre class="r"><code>outliers &lt;- PickOutliers(divergence_score, delta_count, toy_dataset, toy_dataset_recons)
 print(head(outliers))
-#&gt;     Sample      Transcript value reconstruction    zscore      l2fc typeerror
-#&gt; 1  GTEx_18  Transcript_302  1503             85  6.146475  2.501743  2.939767
-#&gt; 2 GTEx_120  Transcript_882   811             47  6.851539  6.498879  7.720836
-#&gt; 3  GTEx_10  Transcript_999     1              3 -2.217702 -4.342792 -5.276288
-#&gt; 4 GTEx_109  Transcript_999     1              4 -3.201443 -3.927755 -4.883647
-#&gt; 5  GTEx_74 Transcript_1172     4              0  5.573136  0.000000  2.667644
-#&gt; 6  GTEx_94 Transcript_1172     4              0  5.573136  0.000000  2.667644
-#&gt;       cooksD        hat dfbetas_intercept dfbetas_var predict AberrantScore
-#&gt; 1  1.8988778 0.30528612         0.3217393    1.985333    TRUE             4
-#&gt; 2 18.0708416 0.37744704         1.1868044    8.163387    TRUE             4
-#&gt; 3  0.6794164 0.04653849        -0.5389617    1.199953    TRUE             1
-#&gt; 4  1.1580484 0.08851517        -0.5001501    1.607494    TRUE             1
-#&gt; 5  1.2011452 0.25237817         0.2796248    1.564511    TRUE             4
-#&gt; 6  1.2011452 0.25237817         0.2796248    1.564511    TRUE             4</code></pre>
+#&gt;     Sample      Transcript value reconstruction divergence_score delta_count
+#&gt; 1  GTEx_18  Transcript_302  1503             85         6.146475    2.501743
+#&gt; 2 GTEx_120  Transcript_882   811             47         6.851539    6.498879
+#&gt; 3  GTEx_10  Transcript_999     1              3        -2.217702   -4.342792
+#&gt; 4 GTEx_109  Transcript_999     1              4        -3.201443   -3.927755
+#&gt; 5  GTEx_74 Transcript_1172     4              0         5.573136    0.000000
+#&gt; 6  GTEx_94 Transcript_1172     4              0         5.573136    0.000000
+#&gt;   typeerror     cooksD        hat dfbetas_intercept dfbetas_var predict
+#&gt; 1  2.939767  1.8988778 0.30528612         0.3217393    1.985333    TRUE
+#&gt; 2  7.720836 18.0708416 0.37744704         1.1868044    8.163387    TRUE
+#&gt; 3 -5.276288  0.6794164 0.04653849        -0.5389617    1.199953    TRUE
+#&gt; 4 -4.883647  1.1580484 0.08851517        -0.5001501    1.607494    TRUE
+#&gt; 5  2.667644  1.2011452 0.25237817         0.2796248    1.564511    TRUE
+#&gt; 6  2.667644  1.2011452 0.25237817         0.2796248    1.564511    TRUE
+#&gt;   AberrantScore
+#&gt; 1             4
+#&gt; 2             4
+#&gt; 3             1
+#&gt; 4             1
+#&gt; 5             4
+#&gt; 6             4</code></pre>
 <p>It is possible to create your own decision tree, to pick outliers. This one was build to find outliers following the OUTRIDER outliers distribution.</p>
 <pre class="r"><code>light_tree &lt;- function(linear_reg_data){
   bool_vector &lt;- ifelse(linear_reg_data[&quot;cooksD&quot;] &gt;= 15.0,TRUE,FALSE)
   return(bool_vector)
 }
-outliers &lt;- PickOutliers(zscore, l2fc, toy_dataset, toy_dataset_recons, decision_tree = light_tree)
+outliers &lt;- PickOutliers(divergence_score, delta_count, toy_dataset, toy_dataset_recons, decision_tree = light_tree)
 print(head(outliers))
-#&gt;     Sample       Transcript value reconstruction     zscore      l2fc typeerror
-#&gt; 1 GTEx_120   Transcript_882   811             47   6.851539  6.498879  7.720836
-#&gt; 2  GTEx_51   Transcript_992     2            165  -6.583237  8.225724 11.141288
-#&gt; 3   GTEx_7  Transcript_4148     4             68  -5.332489  7.193504 11.224972
-#&gt; 4   GTEx_7  Transcript_8495     2             29 -10.138319 10.846666 11.224972
-#&gt; 5   GTEx_7  Transcript_9931     2             30  -5.894027  6.895575  9.500662
-#&gt; 6  GTEx_77 Transcript_13828     2             63  -7.038996  8.011768 11.224972
-#&gt;      cooksD       hat dfbetas_intercept   dfbetas_var predict AberrantScore
-#&gt; 1  18.07084 0.3774470      1.186804e+00  8.163387e+00    TRUE             4
-#&gt; 2  33.28194 0.3490646      9.974651e+00 -6.592351e+01    TRUE             4
-#&gt; 3  19.00067 0.2317136      1.539695e+07 -8.242670e+07    TRUE             4
-#&gt; 4 281.53937 0.8171472      2.595647e+07 -2.641889e+08    TRUE             4
-#&gt; 5  17.66900 0.2813523      1.852611e+00 -1.096224e+01    TRUE             4
-#&gt; 6  41.64248 0.3979501      3.834491e+07 -2.709702e+08    TRUE             4</code></pre>
+#&gt;     Sample       Transcript value reconstruction divergence_score delta_count
+#&gt; 1 GTEx_120   Transcript_882   811             47         6.851539    6.498879
+#&gt; 2  GTEx_51   Transcript_992     2            165        -6.583237    8.225724
+#&gt; 3   GTEx_7  Transcript_4148     4             68        -5.332489    7.193504
+#&gt; 4   GTEx_7  Transcript_8495     2             29       -10.138319   10.846666
+#&gt; 5   GTEx_7  Transcript_9931     2             30        -5.894027    6.895575
+#&gt; 6  GTEx_77 Transcript_13828     2             63        -7.038996    8.011768
+#&gt;   typeerror    cooksD       hat dfbetas_intercept   dfbetas_var predict
+#&gt; 1  7.720836  18.07084 0.3774470      1.186804e+00  8.163387e+00    TRUE
+#&gt; 2 11.141288  33.28194 0.3490646      9.974651e+00 -6.592351e+01    TRUE
+#&gt; 3 11.224972  19.00067 0.2317136      1.539695e+07 -8.242670e+07    TRUE
+#&gt; 4 11.224972 281.53937 0.8171472      2.595647e+07 -2.641889e+08    TRUE
+#&gt; 5  9.500662  17.66900 0.2813523      1.852611e+00 -1.096224e+01    TRUE
+#&gt; 6 11.224972  41.64248 0.3979501      3.834491e+07 -2.709702e+08    TRUE
+#&gt;   AberrantScore
+#&gt; 1             4
+#&gt; 2             4
+#&gt; 3             4
+#&gt; 4             4
+#&gt; 5             4
+#&gt; 6             4</code></pre>
 <p>In the package you can also find a function to estimate the size factor. But to use it, you need a table containing information on the samples</p>
 <pre class="r"><code>anno_table &lt;- data.frame(sampleID = colnames(toy_dataset), Sex = sample(c(&quot;Male&quot;, &quot;Female&quot;), 128, replace = TRUE), Age = sample(1:89, 128, replace = TRUE), Cohort = rep(&quot;GTEx database&quot;,128))
 sizefactor &lt;- SizeFactors(toy_dataset, anno_table)

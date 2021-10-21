@@ -94,16 +94,16 @@ To judge the performance of the reconstruction use the function *StatsPred*
 StatsPred(toy_dataset, toy_dataset_recons)
 ```
 
-Then two metric is needed for the linear regression, ABEILLE offers a function to compute the Z-score and the Log2 fold-change. As the neural network you can provide your own metric.
+Then two metric is needed for the linear regression, ABEILLE offers a function to compute the Divergence score and the Delta count. As the neural network you can provide your own metric.
 ```{r}
-zscore <- Zscore(toy_dataset, toy_dataset_recons)
-l2fc <- L2FC(toy_dataset, toy_dataset_recons)
+divergence_score <- DivergenceScore(toy_dataset, toy_dataset_recons)
+delta_count <- DeltaCount(toy_dataset, toy_dataset_recons)
 ```
 
 Finally to obtain the outliers use the function *PickOutliers*
 The *PickOutliers* function will also use the function *ComputeAberrantScore* that will return an Aberrant Score associated to each Outliers with a score from 1 to 4.
 ```{r}
-outliers <- PickOutliers(zscore, l2fc, toy_dataset, toy_dataset_recons)
+outliers <- PickOutliers(divergence_score, delta_count, toy_dataset, toy_dataset_recons)
 print(head(outliers))
 ```
 It is possible to create your own decision tree, to pick outliers. This one was build to find outliers following the OUTRIDER outliers distribution.
@@ -112,7 +112,7 @@ light_tree <- function(linear_reg_data){
   bool_vector <- ifelse(linear_reg_data["cooksD"] >= 15.0,TRUE,FALSE)
   return(bool_vector)
 }
-outliers <- PickOutliers(zscore, l2fc, toy_dataset, toy_dataset_recons, decision_tree = light_tree)
+outliers <- PickOutliers(divergence_score, delta_count, toy_dataset, toy_dataset_recons, decision_tree = light_tree)
 print(head(outliers))
 ```
 

@@ -5,17 +5,17 @@
 \title{Function to pick outliers}
 \usage{
 PickOutliers(
-  zscore,
-  l2fc,
+  divergence_score,
+  delta_count,
   SequencingTable,
   ReconstructedTable,
   decision_tree = my_tree
 )
 }
 \arguments{
-\item{zscore}{data frame of the same size as the initial dataset. The z-score can be compute with the function Zscore.}
+\item{divergence_score}{data frame of the same size as the initial dataset. The divergence score can be compute with the function divergence_score.}
 
-\item{l2fc}{data frame of the same size as the initial dataset. The log2 fold-change can be compute with the function L2FC.}
+\item{delta_count}{data frame of the same size as the initial dataset. The log2 fold-change can be compute with the function delta_count.}
 
 \item{SequencingTable}{a read counts table with the transcripts in row and the samples in column.}
 
@@ -32,10 +32,10 @@ Successively using linear regression and decision tree this function is able to 
 \examples{
 SequencingTable <- ExampleAbeilleDataSet
 ReconstructedTable <- ExampleAbeilleReconstructed
-zscore <- Zscore(SequencingTable,ReconstructedTable)
-l2fc <- L2FC(SequencingTable,ReconstructedTable)
+divergence_score <- divergence_score(SequencingTable,ReconstructedTable)
+delta_count <- delta_count(SequencingTable,ReconstructedTable)
 genedisp <- GeneDisp(SequencingTable)
-outliers <- PickOutliers(zscore,l2fc,SequencingTable, ReconstructedTable,
+outliers <- PickOutliers(divergence_score,delta_count,SequencingTable, ReconstructedTable,
 decision_tree = my_tree)
 print(head(outliers))
 }

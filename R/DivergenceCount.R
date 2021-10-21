@@ -1,6 +1,6 @@
-#' Compute the Z-score
+#' Compute the Divergence Score
 #'
-#' @description Metric used to find outliers, this definition of the Z-score is not the classic one.
+#' @description Metric used to find outliers, this definition is inspired from the Z-score is not the classic one.
 #'
 #' @param SequencingTable a read counts table with the transcripts in row and the samples in column.
 #' @param ReconstructedTable the reconstructed table generate by an autoencoder.
@@ -12,7 +12,7 @@
 #' More detail in the ABEILLE paper.
 #' @importFrom matrixStats rowSds
 #' @export
-Zscore <- function(SequencingTable, ReconstructedTable){
+DivergenceScore <- function(SequencingTable, ReconstructedTable){
   if (class(SequencingTable)[1] == "data.frame"){SequencingTable <- as.matrix(SequencingTable)}
   if (class(ReconstructedTable)[1] == "data.frame"){ReconstructedTable <- as.matrix(ReconstructedTable)}
   Lij <- log2((SequencingTable+1)/(ReconstructedTable+1))
