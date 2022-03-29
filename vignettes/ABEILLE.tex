@@ -1,0 +1,268 @@
+%\VignetteIndexEntry{ABEILLE (ABerrant Expression Identification empLoying machine LEarning)}
+%\VignettePackage{ABEILLE}
+%\VignetteEngine{knitr::knitr}
+%\VignetteEncoding{UTF-8}
+
+\documentclass[9pt]{article}\usepackage[]{graphicx}\usepackage[usenames,dvipsnames]{color}
+% maxwidth is the original width if it is less than linewidth
+% otherwise use linewidth (to make sure the graphics do not exceed the margin)
+\makeatletter
+\def\maxwidth{ %
+  \ifdim\Gin@nat@width>\linewidth
+    \linewidth
+  \else
+    \Gin@nat@width
+  \fi
+}
+\makeatother
+
+\definecolor{fgcolor}{rgb}{0.251, 0.251, 0.251}
+\makeatletter
+\@ifundefined{AddToHook}{}{\AddToHook{package/xcolor/after}{\definecolor{fgcolor}{rgb}{0.251, 0.251, 0.251}}}
+\makeatother
+\newcommand{\hlnum}[1]{\textcolor[rgb]{0.816,0.125,0.439}{#1}}%
+\newcommand{\hlstr}[1]{\textcolor[rgb]{0.251,0.627,0.251}{#1}}%
+\newcommand{\hlcom}[1]{\textcolor[rgb]{0.502,0.502,0.502}{\textit{#1}}}%
+\newcommand{\hlopt}[1]{\textcolor[rgb]{0,0,0}{#1}}%
+\newcommand{\hlstd}[1]{\textcolor[rgb]{0.251,0.251,0.251}{#1}}%
+\newcommand{\hlkwa}[1]{\textcolor[rgb]{0.125,0.125,0.941}{#1}}%
+\newcommand{\hlkwb}[1]{\textcolor[rgb]{0,0,0}{#1}}%
+\newcommand{\hlkwc}[1]{\textcolor[rgb]{0.251,0.251,0.251}{#1}}%
+\newcommand{\hlkwd}[1]{\textcolor[rgb]{0.878,0.439,0.125}{#1}}%
+\let\hlipl\hlkwb
+
+\newenvironment{knitrout}{}{} % an empty environment to be redefined in TeX
+\usepackage{alltt}
+
+\RequirePackage[]{/home/jeanelisee/R/x86_64-pc-linux-gnu-library/4.1/BiocStyle/resources/tex/Bioconductor}
+\AtBeginDocument{\bibliographystyle{/home/jeanelisee/R/x86_64-pc-linux-gnu-library/4.1/BiocStyle/resources/tex/unsrturl}}
+
+
+
+
+\usepackage{hyperref}
+\usepackage{verbatim}
+\usepackage[nottoc]{tocbibind}
+
+\title{Vignette: How to use ABEILLE}
+
+\author{}
+\date{}
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\begin{document}
+
+\maketitle
+
+We will demonstrate in this vignette how to use ABEILLE and show how we can customize the package to perform a different task. We first need to load the library. The instructions to install can be found \href{https://github.com/uca-mdlab/ABEILLE/blob/main/README.md}{here}.
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.941, 0.941, 0.941}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{# Loading ABEILLE library}
+\hlkwd{library}\hlstd{(}\hlstr{"ABEILLE"}\hlstd{)}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+We will use the toy dataset located in this repository to perform our demonstration
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.941, 0.941, 0.941}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{toy_dataset} \hlkwb{<-} \hlstd{ExampleAbeilleDataSet}
+\hlkwd{print}\hlstd{(}\hlkwd{paste}\hlstd{(}\hlstr{"The dataframe contains"}\hlstd{,}
+            \hlkwd{dim}\hlstd{(toy_dataset)[}\hlnum{1}\hlstd{],}\hlstr{"transcripts and"}\hlstd{,}
+            \hlkwd{dim}\hlstd{(toy_dataset)[}\hlnum{2}\hlstd{],}\hlstr{"samples"}\hlstd{))}
+\end{alltt}
+\begin{verbatim}
+## [1] "The dataframe contains 14000 transcripts and 128 samples"
+\end{verbatim}
+\begin{alltt}
+\hlkwd{head}\hlstd{(toy_dataset[,}\hlnum{1}\hlopt{:}\hlnum{6}\hlstd{])}
+\end{alltt}
+\begin{verbatim}
+##              GTEx_1 GTEx_2 GTEx_3 GTEx_4 GTEx_5 GTEx_6
+## Transcript_1      2      0      0      0      0      0
+## Transcript_2     60     67     73     57    135     46
+## Transcript_3      0      0      0      0      0      0
+## Transcript_4      0      0      0      0      0      0
+## Transcript_5   7638   4057   7978   3913    175   3471
+## Transcript_6      2      0      0      1      3      0
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+\section{Quality control of the data}
+
+Once the dataset loaded as dataframe in which genes are in rows and samples in columns, we need now to ensure that the data are conform and can be used within ABEILLE, so we run \textbf{DataIntegrity} function.
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.941, 0.941, 0.941}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{DataIntegrity}\hlstd{(toy_dataset)}
+\end{alltt}
+\begin{verbatim}
+## Data integrity is validated
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+\section{Remove unexpressed genes in all patients}
+
+Filter out unexpressed genes in all patients with the function \textbf{RemoveZeroCounts}.
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.941, 0.941, 0.941}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{toy_dataset[}\hlnum{14001}\hlstd{,]} \hlkwb{<-} \hlnum{0}
+\hlkwd{print}\hlstd{(}\hlkwd{dim}\hlstd{(toy_dataset))}
+\end{alltt}
+\begin{verbatim}
+## [1] 14001   128
+\end{verbatim}
+\begin{alltt}
+\hlstd{toy_dataset} \hlkwb{<-} \hlkwd{RemoveZeroCounts}\hlstd{(toy_dataset)}
+\end{alltt}
+\begin{verbatim}
+## 1 transcripts removed over 14001 (which corresponds to 0.01 % of the dataset)
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+Save the dataset that was created after removing the zero counts.
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.941, 0.941, 0.941}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{write.csv}\hlstd{(toy_dataset,} \hlstr{"toy_dataset.csv"}\hlstd{)}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+\section{Reconstruct the data with a Variational AutoEncoder (VAE)}
+
+The third step is to use the VAE to get reconstructed data from the original filtered data.
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.941, 0.941, 0.941}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{library}\hlstd{(reticulate)}
+\hlcom{#Source my own python environment}
+\hlcom{#To find your python path you can use os.path.dirname(sys.executable) on python}
+\hlkwd{use_python}\hlstd{(}\hlstr{"C:/ProgramData/Anaconda3"}\hlstd{)}
+\hlcom{#If you don't have environment ready, you can load library needed in python}
+\hlkwd{py_install}\hlstd{(}\hlstr{"numpy"}\hlstd{)}
+\hlkwd{py_install}\hlstd{(}\hlstr{"pandas"}\hlstd{)}
+\hlkwd{py_install}\hlstd{(}\hlstr{"tensorflow"}\hlstd{)}
+\hlcom{#Load the VAE function}
+\hlkwd{source_python}\hlstd{(}\hlstr{"abeille.py"}\hlstd{)}
+\hlstd{toy_dataset_recons} \hlkwb{<-} \hlkwd{abeille_VAE}\hlstd{(}\hlstr{"toy_dataset.csv"}\hlstd{)}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+Here is the list of all the arguments usable in the abeille\_VAE function:
+
+WARNING: if you use it on R arguments using an integer needs to be set as 20L for 20 (for example)
+
+\begin{itemize}
+\item \textbf{file} (only mandatory parameter), the path to the file to pass in the autoencoder.
+\item \textbf{logarithm} (default True), boolean to log the input data.
+\item \textbf{read\_count} (default True), boolean to correct value bellow 0 (needed if you use read count data).
+\item \textbf{batch\_size} (default 30), number of training examples utilized in one iteration.
+\item \textbf{epochs} (default 1500), number of time the dataset is passed forward and backward through the neural network.
+\item \textbf{kernel} (default "lecun\_normal"), type of initialization of the neurons.
+\item \textbf{kl\_loss\_weight} (default 0.5), weight of the Kullback - Leibler loss.
+\item \textbf{edl1} (default 2048), stand for encoder dense layer 1, number of layer in the first hidden layer.
+\item \textbf{edl2} (default 1024), stand for encoder dense layer 2, number of layer in the second hidden layer.
+\item \textbf{edl3} (default 512), stand for encoder dense layer 3, number of layer in the third hidden layer.
+\item \textbf{edl4} (default 256), stand for encoder dense layer 4, number of layer in the fourth hidden layer.
+\item \textbf{latent\_size} (default 128), size of the latent space
+\item \textbf{ddl1} (default 256), stand for decoder dense layer 1, number of layer in the sixth layer.
+\item \textbf{ddl2} (default 512), stand for decoder dense layer 2, number of layer in the seventh layer.
+\item \textbf{ddl3} (default 1024), stand for decoder dense layer 3, number of layer in the eigth layer.
+\item \textbf{ddl4} (default 2048), stand for decoder dense layer 4, number of layer in the ninth layer.
+
+\end{itemize}
+
+An example of reconstructed data is available in ABEILLE package, we will use it for the rest of the pipeline.
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.941, 0.941, 0.941}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{toy_dataset_recons} \hlkwb{<-} \hlstd{ExampleAbeilleReconstructed}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+To judge the performance of the reconstruction, use the function \textbf{StatsPred}.
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.941, 0.941, 0.941}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{StatsPred}\hlstd{(toy_dataset, toy_dataset_recons)}
+\end{alltt}
+\begin{verbatim}
+## Number of observations : 1792000 
+## Mean : 683.2478 
+## Median : 1 
+## Min : 0 
+## Quantile 10% : 0 
+## Quantile 25% : 0 
+## Quantile 75% : 28 
+## Quantile 90% : 798 
+## Max : 2904284 
+## Standard deviation : 9527.474 
+## Skewness : 90.22985 
+## Empty samples: 0 on 128 
+## Empty transcripts: 5419 on 14000 
+## Number of zeros: 888391 on 799381
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+\section{Compute two novel metrics}
+
+From input and reconstructed data, two metrics are computed : the divergence score and the delta count with \textbf{DivergenceScore} and \textbf{DeltaCount} functions.
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.941, 0.941, 0.941}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{divergence_score} \hlkwb{<-} \hlkwd{DivergenceScore}\hlstd{(toy_dataset, toy_dataset_recons)}
+\hlstd{delta_count} \hlkwb{<-} \hlkwd{DeltaCount}\hlstd{(toy_dataset, toy_dataset_recons)}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+\section{Identify AGE}
+
+Finally, to obtain the AGEs, use the function \textbf{IdentifyAGE}. This function will also use the function \textbf{ComputeAnomalyScore} that will return an anomaly score associated to each AGE between 0 and 1.
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.941, 0.941, 0.941}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{ages} \hlkwb{<-} \hlkwd{IdentifyAGE}\hlstd{(divergence_score, delta_count, toy_dataset,}
+                    \hlstd{toy_dataset_recons)}
+\hlkwd{print}\hlstd{(}\hlkwd{head}\hlstd{(ages))}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+The default decision tree \textbf{my\_tree} was built to find AGEs following the OUTRIDER AGEs distribution but the function can work with your own decision tree.
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.941, 0.941, 0.941}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{light_tree} \hlkwb{<-} \hlkwa{function}\hlstd{(}\hlkwc{linear_reg_data}\hlstd{)\{}
+  \hlstd{bool_vector} \hlkwb{<-} \hlkwd{ifelse}\hlstd{(linear_reg_data[}\hlstr{"cooksD"}\hlstd{]} \hlopt{>=} \hlnum{15.0}\hlstd{,}\hlnum{TRUE}\hlstd{,}\hlnum{FALSE}\hlstd{)}
+  \hlkwd{return}\hlstd{(bool_vector)}
+\hlstd{\}}
+\hlstd{ages} \hlkwb{<-} \hlkwd{IdentifyAGE}\hlstd{(divergence_score, delta_count, toy_dataset,}
+                    \hlstd{toy_dataset_recons,} \hlkwc{decision_tree} \hlstd{= light_tree)}
+\hlkwd{print}\hlstd{(}\hlkwd{head}\hlstd{(ages))}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+
+\end{document}

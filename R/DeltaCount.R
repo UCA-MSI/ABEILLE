@@ -1,6 +1,6 @@
 #' Compute the Delta Count
 #'
-#' @description Metric used to find outliers, this definition is inspired from the log2 fold-change is not the classic one.
+#' @description Metric used to find AGE, this definition is inspired from the log2 fold-change is not the classic one.
 #'
 #' @param SequencingTable a read counts table with the transcripts in row and the samples in column.
 #' @param ReconstructedTable the reconstructed table generate by an autoencoder.

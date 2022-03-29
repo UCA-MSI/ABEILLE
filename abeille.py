@@ -9,17 +9,17 @@ import tensorflow as tf
 tfk = tf.keras
 tfkl = tfk.layers
 
-
-def abeille_VAE(file, logarithm = True, read_count = True,
+def abeille_VAE(file,logarithm = True, read_count = True,
                 batch_size = 30, epochs = 1500, kernel = "lecun_normal",
                 kl_loss_weight = 0.5, edl1 = 2048, edl2 = 1024, edl3 = 512,
                 edl4 = 256, latent_size = 128, ddl1 = 256, ddl2 = 512,
                 ddl3 = 1024, ddl4 = 2048):
+    tf.random.set_seed(3528374635.369094)
     def sampling(args):
         z_mean, z_log_var = args
         batch = tfk.backend.shape(z_mean)[0]
         dim = tfk.backend.int_shape(z_mean)[1]
-        epsilon = tfk.backend.random_normal(shape=(batch, dim))
+        epsilon = tfk.backend.random_normal(shape=(batch, dim),seed=3528374635.369094)
         out = z_mean + tf.keras.backend.exp(0.5 * z_log_var) * epsilon
         return out
     data = pd.read_csv(file, index_col = 0)
@@ -55,6 +55,7 @@ def abeille_VAE(file, logarithm = True, read_count = True,
     z_log_var = tfkl.Dense(latent_size, name='z_log_var')(hidden_encoder_4_activation)
     #Sample from the values below
     z = tfkl.Lambda(sampling, output_shape=(latent_size,), name='z')([z_mean, z_log_var])
+    
     #Encoder model
     encoder = tfk.Model(inputs, [z_mean, z_log_var, z], name='encoder')
     
@@ -65,6 +66,7 @@ def abeille_VAE(file, logarithm = True, read_count = True,
     hidden_decoder_5 = tfkl.Dense(ddl1, kernel_initializer = kernel, name="hidden_decoder_4")(latent_inputs)
     decoder_norm_5 = tfkl.BatchNormalization(name="decoder_norm_4")(hidden_decoder_5)
     hidden_encoder_5_activation = tfkl.ELU()(decoder_norm_5)
+    
     #Sixth hidden layer
     hidden_decoder_6 = tfkl.Dense(ddl2, kernel_initializer = kernel, name="hidden_decoder_5")(hidden_encoder_5_activation)
     decoder_norm_6 = tfkl.BatchNormalization(name="decoder_norm_5")(hidden_decoder_6)
@@ -85,6 +87,7 @@ def abeille_VAE(file, logarithm = True, read_count = True,
     #####VAE
     outputs = decoder(encoder(inputs)[2])
     vae = tfk.Model(inputs, outputs, name="vae")
+    #vae = tfk.Model(inputs, outputs=[outputs, z], name="vae")
     
     #####Personalized loss
     msle = tfk.losses.MSLE(inputs, outputs)
@@ -103,6 +106,11 @@ def abeille_VAE(file, logarithm = True, read_count = True,
     print("-----",end_time//3600,"hours",(end_time%3600)//60,"minutes",round((end_time%3600)%60,2),"secondes","-----")
     
     pred = vae.predict(data_input)
+    # To save the latent space
+    #pred, latent_space = vae.predict(data_input)
+    #latent_space=pd.DataFrame(latent_space)
+    #latent_space.index=data_input.columns
+    #np.savetxt(f"/home/justine/projet_abeille/seed3528374635.369094/latentspace_128dim.csv", latent_space, delimiter=",")
     pred = pd.DataFrame(pred)
     pred.index = data_input.index
     pred.columns = data_input.columns
@@ -111,17 +119,5 @@ def abeille_VAE(file, logarithm = True, read_count = True,
     if read_count == True:
         pred = pred * (pred > 0)
     pred = pred.T
+    
     return(pred)
-
-
-if __name__ == "__main__":
-
-    args = parser = argparse.ArgumentParser(
-        description='Launch ABEILLE VAE')
-    parser.add_argument('file', type=str, help='File to reconstruct')
-    parser.add_argument('output', type = str, help = 'Output file name')
-
-    args = parser.parse_args()
-
-    data_recons = abeille_VAE(args.file)
-    data_recons.to_csv(args.output)

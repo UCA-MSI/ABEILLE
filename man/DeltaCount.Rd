@@ -19,7 +19,7 @@ All Delta Count in a matrix. The computation is the following one:
 More detail in the ABEILLE paper.
 }
 \description{
-Metric used to find outliers, this definition is inspired from the log2 fold-change is not the classic one.
+Metric used to find AGE, this definition is inspired from the log2 fold-change is not the classic one.
 }
 \examples{
 SequencingTable <- ExampleAbeilleDataSet

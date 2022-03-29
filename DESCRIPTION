@@ -23,5 +23,6 @@ Imports:
     matrixStats,
     stats,
     progress,
-    reticulate
+    reticulate,
+    solitude
 RoxygenNote: 7.1.2

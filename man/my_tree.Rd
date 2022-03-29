@@ -2,7 +2,7 @@
 % Please edit documentation in R/my_tree.R
 \name{my_tree}
 \alias{my_tree}
-\title{Decision tree to choose outliers}
+\title{Decision tree to choose AGEs}
 \usage{
 my_tree(linear_reg_data)
 }
@@ -10,10 +10,10 @@ my_tree(linear_reg_data)
 \item{linear_reg_data}{data of the linear regression.}
 }
 \value{
-Boolean vector. This function is build to feed the PickOutliers one, but you can build your own.
+Boolean vector. This function is build to feed IdentifyAGE function, but you can build your own.
 }
 \description{
-The decision tree to pick outliers is a function using filters on different variables of the linear regression. This one was created by using CART on OUTRIDER outliers on the GTEx database. It is possible to use a custom decision tree by chaining ifelse conditions. Here are all variables usable:
+The decision tree to pick AGEs is a function using filters on different variables of the linear regression. This one was created by using CART on OUTRIDER outliers on the GTEx database. It is possible to use a custom decision tree by chaining ifelse conditions. Here are all variables usable:
 \itemize{
  \item{"value"}{ the original value.}
  \item{"reconstruction"}{ the value reconstructed.}

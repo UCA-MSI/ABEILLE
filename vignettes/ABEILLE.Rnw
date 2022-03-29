@@ -1,0 +1,168 @@
+%\VignetteIndexEntry{ABEILLE (ABerrant Expression Identification empLoying machine LEarning)}
+%\VignettePackage{ABEILLE}
+%\VignetteEngine{knitr::knitr}
+%\VignetteEncoding{UTF-8}
+
+\documentclass[9pt]{article}
+
+<<style-knitr, eval=TRUE, echo=FALSE, cache=FALSE, results="asis">>=
+BiocStyle::latex()
+@
+
+<<knitr, echo=FALSE, cache=FALSE, results="hide">>=
+library(knitr)
+library("crayon")
+opts_chunk$set(
+    tidy=FALSE,
+    dev="png",
+    fig.width=7,
+    fig.height=7,
+    dpi=300,
+    message=FALSE,
+    warning=FALSE,
+    cache=TRUE
+)
+@
+
+\usepackage{hyperref}
+\usepackage{verbatim}
+\usepackage[nottoc]{tocbibind}
+
+\title{Vignette: How to use ABEILLE}
+
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+We will demonstrate in this vignette how to use ABEILLE and show how we can customize the package to perform a different task. We first need to load the library. The instructions to install can be found \href{https://github.com/uca-mdlab/ABEILLE/blob/main/README.md}{here}.
+
+<<LoadingLibraries>>=
+# Loading ABEILLE library
+library("ABEILLE")
+@
+
+We will use the toy dataset located in this repository to perform our demonstration
+
+<<loadDataset>>=
+toy_dataset <- ExampleAbeilleDataSet
+print(paste("The dataframe contains",
+            dim(toy_dataset)[1],"transcripts and",
+            dim(toy_dataset)[2],"samples"))
+head(toy_dataset[,1:6])
+@
+
+\section{Quality control of the data}
+
+Once the dataset loaded as dataframe in which genes are in rows and samples in columns, we need now to ensure that the data are conform and can be used within ABEILLE, so we run \textbf{DataIntegrity} function.
+
+<<CheckDataIntegrity>>=
+DataIntegrity(toy_dataset)
+@
+
+\section{Remove unexpressed genes in all patients}
+
+Filter out unexpressed genes in all patients with the function \textbf{RemoveZeroCounts}.
+
+<<RemoveZeroCount>>=
+toy_dataset[14001,] <- 0
+print(dim(toy_dataset))
+
+toy_dataset <- RemoveZeroCounts(toy_dataset)
+@
+
+Save the dataset that was created after removing the zero counts.
+
+<<SavingDataset, eval=FALSE>>=
+write.csv(toy_dataset, "toy_dataset.csv")
+@
+
+\section{Reconstruct the data with a Variational AutoEncoder (VAE)}
+
+The third step is to use the VAE to get reconstructed data from the original filtered data.
+
+<<CreatingReconstruction, eval=FALSE>>=
+library(reticulate)
+#Source my own python environment
+#To find your python path you can use os.path.dirname(sys.executable) on python
+use_python("C:/ProgramData/Anaconda3")
+#If you don't have environment ready, you can load library needed in python
+py_install("numpy")
+py_install("pandas")
+py_install("tensorflow")
+#Load the VAE function
+source_python("abeille.py")
+toy_dataset_recons <- abeille_VAE("toy_dataset.csv")
+@
+
+Here is the list of all the arguments usable in the abeille\_VAE function:
+
+WARNING: if you use it on R arguments using an integer needs to be set as 20L for 20 (for example)
+
+\begin{itemize}
+\item \textbf{file} (only mandatory parameter), the path to the file to pass in the autoencoder.
+\item \textbf{logarithm} (default True), boolean to log the input data.
+\item \textbf{read\_count} (default True), boolean to correct value bellow 0 (needed if you use read count data).
+\item \textbf{batch\_size} (default 30), number of training examples utilized in one iteration.
+\item \textbf{epochs} (default 1500), number of time the dataset is passed forward and backward through the neural network.
+\item \textbf{kernel} (default "lecun\_normal"), type of initialization of the neurons.
+\item \textbf{kl\_loss\_weight} (default 0.5), weight of the Kullback - Leibler loss.
+\item \textbf{edl1} (default 2048), stand for encoder dense layer 1, number of layer in the first hidden layer.
+\item \textbf{edl2} (default 1024), stand for encoder dense layer 2, number of layer in the second hidden layer.
+\item \textbf{edl3} (default 512), stand for encoder dense layer 3, number of layer in the third hidden layer.
+\item \textbf{edl4} (default 256), stand for encoder dense layer 4, number of layer in the fourth hidden layer.
+\item \textbf{latent\_size} (default 128), size of the latent space
+\item \textbf{ddl1} (default 256), stand for decoder dense layer 1, number of layer in the sixth layer.
+\item \textbf{ddl2} (default 512), stand for decoder dense layer 2, number of layer in the seventh layer.
+\item \textbf{ddl3} (default 1024), stand for decoder dense layer 3, number of layer in the eigth layer.
+\item \textbf{ddl4} (default 2048), stand for decoder dense layer 4, number of layer in the ninth layer.
+
+\end{itemize}
+
+An example of reconstructed data is available in ABEILLE package, we will use it for the rest of the pipeline.
+
+<<LoadingReconstructedFile>>=
+toy_dataset_recons <- ExampleAbeilleReconstructed
+@
+
+To judge the performance of the reconstruction, use the function \textbf{StatsPred}.
+
+<<StatPred>>=
+StatsPred(toy_dataset, toy_dataset_recons)
+@
+
+\section{Compute two novel metrics}
+
+From input and reconstructed data, two metrics are computed : the divergence score and the delta count with \textbf{DivergenceScore} and \textbf{DeltaCount} functions.
+
+<<Metrics>>=
+divergence_score <- DivergenceScore(toy_dataset, toy_dataset_recons)
+delta_count <- DeltaCount(toy_dataset, toy_dataset_recons)
+@
+
+\section{Identify AGE}
+
+Finally, to obtain the AGEs, use the function \textbf{IdentifyAGE}. This function will also use the function \textbf{ComputeAnomalyScore} that will return an anomaly score associated to each AGE between 0 and 1.
+
+<<AGE, eval=FALSE>>=
+ages <- IdentifyAGE(divergence_score, delta_count, toy_dataset,
+                    toy_dataset_recons)
+print(head(ages))
+@
+
+The default decision tree \textbf{my\_tree} was built to find AGEs following the OUTRIDER AGEs distribution but the function can work with your own decision tree.
+
+<<DecisionTree, eval=FALSE>>=
+light_tree <- function(linear_reg_data){
+  bool_vector <- ifelse(linear_reg_data["cooksD"] >= 15.0,TRUE,FALSE)
+  return(bool_vector)
+}
+ages <- IdentifyAGE(divergence_score, delta_count, toy_dataset,
+                    toy_dataset_recons, decision_tree = light_tree)
+print(head(ages))
+@
+
+
+\end{document}

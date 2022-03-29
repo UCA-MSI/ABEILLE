@@ -1,6 +1,6 @@
-#' Decision tree to choose outliers
+#' Decision tree to choose AGEs
 #'
-#' @description The decision tree to pick outliers is a function using filters on different variables of the linear regression. This one was created by using CART on OUTRIDER outliers on the GTEx database. It is possible to use a custom decision tree by chaining ifelse conditions. Here are all variables usable:
+#' @description The decision tree to pick AGEs is a function using filters on different variables of the linear regression. This one was created by using CART on OUTRIDER outliers on the GTEx database. It is possible to use a custom decision tree by chaining ifelse conditions. Here are all variables usable:
 #' \itemize{
 #'  \item{"value"}{ the original value.}
 #'  \item{"reconstruction"}{ the value reconstructed.}
@@ -14,7 +14,7 @@
 #'
 #' @param linear_reg_data data of the linear regression.
 #'
-#' @return Boolean vector. This function is build to feed the PickOutliers one, but you can build your own.
+#' @return Boolean vector. This function is build to feed IdentifyAGE function, but you can build your own.
 #' @examples
 #' \dontrun{
 #'  #The decision tree used:
