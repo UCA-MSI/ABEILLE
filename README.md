@@ -140,3 +140,6 @@ python abeille.py --file /path/to/the/dataset
 ```
 The hyper-parameters can be added at the moment of executing the reconstruction. The reconstruction obtained can be then feed to the workflow to obtain the aberrant gene expression (AGE).
 
+## Exploring ABEILLE VAE features
+
+ABEILLE encoded feature dimensions with covariate information can be explored using our shinny application hosted at https://jlabory.shinyapps.io/ABEILLE-main/.
